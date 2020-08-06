@@ -361,30 +361,36 @@ namespace GoogleTranslateFreeApi
 
 		protected static Corrections GetTranslationCorrections(JToken response)
 		{
-			if (!response.HasValues)
-				return new Corrections();
-
-			Corrections corrections = new Corrections();
-
-			JToken textCorrectionInfo = response[7];
-
-			if (textCorrectionInfo.HasValues)
+			try
 			{
-				Regex pattern = new Regex(@"<b><i>(.*?)</i></b>");
-				MatchCollection matches = pattern.Matches((string)textCorrectionInfo[0]);
+				if (!response.HasValues)
+					return new Corrections();
 
-				var correctedText = (string)textCorrectionInfo[1];
-				var correctedWords = new string[matches.Count];
+				Corrections corrections = new Corrections();
 
-				for (int i = 0; i < matches.Count; i++)
-					correctedWords[i] = matches[i].Groups[1].Value;
+				JToken textCorrectionInfo = response[7];
 
-				corrections.CorrectedWords = correctedWords;
-				corrections.CorrectedText = correctedText;
-				corrections.TextWasCorrected = true;
+				if (textCorrectionInfo.HasValues)
+				{
+					Regex pattern = new Regex(@"<b><i>(.*?)</i></b>");
+					MatchCollection matches = pattern.Matches((string)textCorrectionInfo[0]);
+
+					var correctedText = (string)textCorrectionInfo[1];
+					var correctedWords = new string[matches.Count];
+
+					for (int i = 0; i < matches.Count; i++)
+						correctedWords[i] = matches[i].Groups[1].Value;
+
+					corrections.CorrectedWords = correctedWords;
+					corrections.CorrectedText = correctedText;
+					corrections.TextWasCorrected = true;
+				}
+
+				return corrections;
 			}
-
-			return corrections;
+			catch {
+				return new Corrections();
+			}
 		}
 
 		protected IEnumerable<LanguageDetection> GetLanguageDetections(JArray item)
